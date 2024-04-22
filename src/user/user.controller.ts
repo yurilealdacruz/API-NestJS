@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto.ts";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
@@ -23,7 +23,12 @@ export class userController {
 
       @Get(":id")
       async show(@Body() body, @Param('id') id : string) {
-          return this.userService.getId(Number(id))
+          const user = await this.userService.getId(Number(id))
+
+          if(!user) {
+            throw new NotFoundException('Usuário não encontrado');
+          }
+          return user
       }
   
 
