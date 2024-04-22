@@ -22,8 +22,8 @@ export class userController {
       }
 
       @Get(":id")
-      async show(@Body() body, @Param('id') id : string) {
-          const user = await this.userService.getId(Number(id))
+      async show(@Param('id', ParseIntPipe) id : number) {
+          const user = await this.userService.show(id)
 
           if(!user) {
             throw new NotFoundException('Usuário não encontrado');
