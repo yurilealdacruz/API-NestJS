@@ -22,8 +22,8 @@ export class userController {
       }
 
       @Get(":id")
-      async show(@Body() body, @Param() param) {
-          return this.userService.list()
+      async show(@Body() body, @Param('id') id : string) {
+          return this.userService.getId(Number(id))
       }
   
 
