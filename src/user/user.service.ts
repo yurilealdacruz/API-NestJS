@@ -4,6 +4,7 @@ import { prismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto.ts";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
 import { NotFoundError } from "rxjs";
+import * as bcrypt from "bcrypt";
 
 
 @Injectable()
@@ -13,6 +14,10 @@ export class userService {
 
     async create(data: CreateUserDTO) {
 
+
+        const salt = await bcrypt.genSalt()
+        data.password = await bcrypt.hash(data.password, salt)
+        
         return this.prisma.user.create({
             data
         })
@@ -41,41 +46,51 @@ export class userService {
         })
     }
 
-    async update(id: number, {name, email, password, birthAt}: UpdatePutUserDTO ){
+    async update(id: number, {name, email, password, birthAt, role}: UpdatePutUserDTO ){
 
         await this.exists(id);
+
+        
+        const salt = await bcrypt.genSalt()
+        password = await bcrypt.hash(password, salt)
 
         if (!birthAt) {
             birthAt = null;
         }
 
         return this.prisma.user.update({
-            data : {name, email, password, birthAt: birthAt ? new Date(birthAt) : null}, 
+            data : {name, email, password, birthAt: birthAt ? new Date(birthAt) : null, role}, 
             where : {id}
         })
     }
 
-    async updatePartial(id: number, {name, email, password, birthAt} : UpdatePatchUserDTO){
+    async updatePartial(id: number, {name, email, password, birthAt, role} : UpdatePatchUserDTO){
+        console.log('Service updatePartial received:', {name, email, password, birthAt, role}); // Log para depuração
+        
         await this.exists(id);
         const data: any = {};
 
-        if (birthAt) {
+        if (birthAt !== undefined) {
             data.birthAt = new Date(birthAt);
         }
 
-        if (email) {
+        if (email !== undefined) {
             data.email = email;
         }
 
-        if (name) {
+        if (name !== undefined) {
             data.name = name;
         }
 
-        if (password) {
-            data.password = password;
-        }
-        
+        if (password !== undefined) {
+            data.password = await bcrypt.hash(password,await bcrypt.genSalt());
 
+        }
+        if (role !== undefined) {
+            data.role = role;
+        }
+
+        console.log('Updating user with data:', data); // Log para depuração
 
         return this.prisma.user.update({
             data,
