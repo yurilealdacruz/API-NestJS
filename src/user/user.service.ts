@@ -3,7 +3,6 @@ import { CreateUserDTO } from "./dto/create-user.dto";
 import { prismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto.ts";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
-import { NotFoundError } from "rxjs";
 import * as bcrypt from "bcrypt";
 
 
