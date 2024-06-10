@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, Param } from "@nestjs/common";
 import { CreateUserDTO } from "./dto/create-user.dto";
-import { prismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto.ts";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
 import * as bcrypt from "bcrypt";
@@ -9,7 +8,7 @@ import * as bcrypt from "bcrypt";
 @Injectable()
 export class userService {
 
-    constructor(private readonly prisma: prismaService) {}
+    constructor() {}
 
     async create(data: CreateUserDTO) {
 
