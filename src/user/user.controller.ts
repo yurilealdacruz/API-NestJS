@@ -32,12 +32,12 @@ export class userController {
     @Get(":id")
       async show(@ParamId() id : number) {
           const user = await this.userService.show(id)
-
+/*
           if(!user) {
             throw new NotFoundException('Usuário não encontrado');
           }
           return user
-      }
+     */ }
   
     @Put(":id")
     async update(@Body() data: UpdatePutUserDTO,@ParamId() id: number){

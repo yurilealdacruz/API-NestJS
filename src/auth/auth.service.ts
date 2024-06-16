@@ -4,6 +4,9 @@ import { AuthRegisterDTO } from "./dto/auth-register.dto.ts";
 import { userService } from "src/user/user.service";
 import * as bcrypt from "bcrypt";
 import { MailerService } from "@nestjs-modules/mailer";
+import { UserEntity } from '../user/entity/user.entity';
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
 
 @Injectable()
@@ -16,10 +19,13 @@ export class AuthService {
         private readonly jwtService: JwtService, 
         private readonly userService: userService,
         private readonly mailer: MailerService,
+
+        @InjectRepository(UserEntity)
+        private usersRepository: Repository<UserEntity>,
     ) 
         {}
 
-    async createToken(user:User) {
+    async createToken(user:UserEntity) {
         return {
             accessToken: this.jwtService.sign({
                 id: user.id,
@@ -65,11 +71,11 @@ export class AuthService {
 
     async login(email: string, password: string) {
 
-        const user = await this.prismaService.user.findFirst({
-            where : {
-                email
-            }
+        const user = await this.usersRepository.findOneBy({
+            email
         })
+        
+        console.log(user)
 
         if (!user) {
             throw new UnauthorizedException('E-mail e/ou senha incorreto!');
@@ -84,7 +90,7 @@ export class AuthService {
     }
 
 
-    async resset(password: string, token: string) {
+    async resset(password: string, token: string) { 
 
         try {
             const data:any =  this.jwtService.verify(token, {
@@ -99,26 +105,24 @@ export class AuthService {
                const salt = await bcrypt.genSalt()
                password = await bcrypt.hash(password, salt)
 
-               const user = await this.prismaService.user.update({
-                    where : {
-                        id: Number(data.id)
-                    },
-                    data: {
+               await this.usersRepository.update(Number(data.id), {
                         password
                     }
-                });
-        
+                );
+
+                const user = await this.userService.show(Number(data.id));
+
                 return this.createToken(user);
         
         } catch(e) {
             throw new BadRequestException(e)
-        }
+        } 
     }
 
 
-    async forget(email: string) {
+    async forget(email: string) { 
 
-        const user = await this.prismaService.user.findFirst({
+        const user = await this.usersRepository.findOne({
             where: {
                 email
             }
@@ -133,7 +137,7 @@ export class AuthService {
         }, {expiresIn: "30 minutes",
             subject: String(user.id),
             issuer: "forget",
-            audience: "users"}
+            audience: "users"} 
     
     )
 
@@ -145,6 +149,7 @@ export class AuthService {
                 name: user.name,
                 token
             }
+                
         });
 
         return true;
@@ -153,8 +158,8 @@ export class AuthService {
     async register(data: AuthRegisterDTO) {
         const user = await this.userService.create(data)
 
-        return this.createToken(user);
-    }
+       return this.createToken(user);
+    } 
 
 
 }
