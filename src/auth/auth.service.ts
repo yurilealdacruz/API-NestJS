@@ -1,12 +1,14 @@
 import { BadRequestException, Body, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AuthRegisterDTO } from "./dto/auth-register.dto.ts";
-import { userService } from "src/user/user.service";
 import * as bcrypt from "bcrypt";
 import { MailerService } from "@nestjs-modules/mailer";
 import { UserEntity } from '../user/entity/user.entity';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { userService } from "../user/user.service";
+
+
 
 
 @Injectable()
@@ -75,7 +77,6 @@ export class AuthService {
             email
         })
         
-        console.log(user)
 
         if (!user) {
             throw new UnauthorizedException('E-mail e/ou senha incorreto!');
@@ -122,10 +123,10 @@ export class AuthService {
 
     async forget(email: string) { 
 
-        const user = await this.usersRepository.findOne({
-            where: {
+        const user = await this.usersRepository.findOneBy({
+
                 email
-            }
+
         })
 
         if (!user) {
@@ -140,7 +141,6 @@ export class AuthService {
             audience: "users"} 
     
     )
-
         await this.mailer.sendMail({
             subject: "Recuperação de Senha",
             to: "yuri@gmail.com",
@@ -152,10 +152,13 @@ export class AuthService {
                 
         });
 
-        return true;
+        return {success:true};
 
     }
     async register(data: AuthRegisterDTO) {
+
+        delete data.role;
+
         const user = await this.userService.create(data)
 
        return this.createToken(user);

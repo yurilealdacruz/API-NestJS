@@ -99,7 +99,7 @@ export class userService {
 
         await this.usersRepository.delete(id)
 
-        return "Usuário deletado"
+        return true
 
 
     }

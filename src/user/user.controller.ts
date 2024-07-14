@@ -3,12 +3,12 @@ import { CreateUserDTO } from "./dto/create-user.dto";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto.ts";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
 import { userService } from "./user.service";
-import { ParamId } from "src/decorators/param-id.decorator";
-import { Roles } from "src/decorators/role.decorator";
-import { Role } from "src/enums/role.enum";
-import { RoleGuard } from "src/guards/role.guards";
-import { AuthGuard } from "src/guards/auth.guards";
 import { SkipThrottle } from "@nestjs/throttler";
+import { Role } from "../enums/role.enum";
+import { Roles } from "../decorators/role.decorator";
+import { AuthGuard } from "../guards/auth.guards";
+import { RoleGuard } from "../guards/role.guards";
+import { ParamId } from "../decorators/param-id.decorator";
 
 
 @Roles(Role.Admin)
@@ -32,12 +32,12 @@ export class userController {
     @Get(":id")
       async show(@ParamId() id : number) {
           const user = await this.userService.show(id)
-/*
+
           if(!user) {
             throw new NotFoundException('Usuário não encontrado');
           }
           return user
-     */ }
+      }
   
     @Put(":id")
     async update(@Body() data: UpdatePutUserDTO,@ParamId() id: number){
@@ -57,6 +57,8 @@ export class userController {
 
     @Delete(":id")
     async delete(@ParamId() id: number) {
-        return this.userService.delete(id);
+        return {
+            success: await this.userService.delete(id)
+        }
     }
 }
