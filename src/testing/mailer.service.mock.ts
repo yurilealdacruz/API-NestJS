@@ -1,9 +1,8 @@
-import { MailerService } from "@nestjs-modules/mailer";
+import { MailerService } from '@nestjs-modules/mailer';
 
-export const MailerServiceMock = {                
-    provide: MailerService,
-    useValue: {
-        sendMail: jest.fn()
-
-
-    }}
+export const MailerServiceMock = {
+  provide: MailerService,
+  useValue: {
+    sendMail: jest.fn(),
+  },
+};

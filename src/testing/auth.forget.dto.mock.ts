@@ -1,6 +1,5 @@
-import { AuthforgetDTO } from "../auth/dto/auth-forget.dto.js";
-
+import { AuthforgetDTO } from '../auth/dto/auth-forget.dto.js';
 
 export const authForgetDTO: AuthforgetDTO = {
-    email: 'teste@teste.com',
-}
+  email: 'teste@teste.com',
+};

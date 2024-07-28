@@ -14,48 +14,49 @@ import { UserEntity } from './user/entity/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.ENV === "test" ? ".env.test" : ".env"
+      envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env',
     }),
     ThrottlerModule.forRoot(),
-    forwardRef(() => userModule), 
+    forwardRef(() => userModule),
     forwardRef(() => AuthModule),
-  MailerModule.forRoot({
-    transport: {
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
           user: 'tessie.wunsch83@ethereal.email',
-          pass: 'tYQE4uvHCG4nubvhwU'
-    },
-  },
-    defaults: {
-      from: '"Yakiro" <tessie.wunsch83@ethereal.email>',
-    },
-    template: {
-      dir: __dirname + '/templates',
-      adapter: new PugAdapter(),
-      options: {
-        strict: true,
-      }
-    }
-  }),
-  TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    entities: [UserEntity],
-    synchronize: process.env.ENV === "development",
-  })
-  
+          pass: 'tYQE4uvHCG4nubvhwU',
+        },
+      },
+      defaults: {
+        from: '"Yakiro" <tessie.wunsch83@ethereal.email>',
+      },
+      template: {
+        dir: __dirname + '/templates',
+        adapter: new PugAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      entities: [UserEntity],
+      synchronize: process.env.ENV === 'development',
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard
-  }
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

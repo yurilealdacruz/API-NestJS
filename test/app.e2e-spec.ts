@@ -21,8 +21,8 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(() => {
-    app.close()
-  })
+    app.close();
+  });
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
@@ -37,7 +37,7 @@ describe('AppController (e2e)', () => {
       .send(authRegisterDTO);
 
     expect(response.statusCode).toEqual(201);
-    expect(typeof response.body.accessToken).toEqual("string")
+    expect(typeof response.body.accessToken).toEqual('string');
   });
 
   it('Realizar o Login: ', async () => {
@@ -45,94 +45,100 @@ describe('AppController (e2e)', () => {
       .post('/auth/login')
       .send({
         email: authRegisterDTO.email,
-        password: authRegisterDTO.password
+        password: authRegisterDTO.password,
       });
 
     expect(response.statusCode).toEqual(201);
-    expect(typeof response.body.accessToken).toEqual("string")
+    expect(typeof response.body.accessToken).toEqual('string');
 
-    accessToken = response.body.accessToken
+    accessToken = response.body.accessToken;
   });
 
   it('Obter Dados do Usuário Logado: : ', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/me')
-      .set("Authorization", `barrer ${accessToken}`)
+      .set('Authorization', `barrer ${accessToken}`)
       .send();
 
     expect(response.statusCode).toEqual(201);
-    expect(typeof response.body.id).toEqual("number");
+    expect(typeof response.body.id).toEqual('number');
     expect(response.body.role).toEqual(Role.User);
   });
 
   it('Registrar um novo Usuário como Administrador: ', async () => {
-    console.log('authRegisterDTO:', {...authRegisterDTO, role: Role.Admin, email: "teste@testet.com"});
-  
+    console.log('authRegisterDTO:', {
+      ...authRegisterDTO,
+      role: Role.Admin,
+      email: 'teste@testet.com',
+    });
+
     const response = await request(app.getHttpServer())
       .post('/auth/register')
-      .send({...authRegisterDTO, role: Role.Admin, email: "teste@testet.com"});
-  
+      .send({
+        ...authRegisterDTO,
+        role: Role.Admin,
+        email: 'teste@testet.com',
+      });
+
     console.log('Response:', response.body);
-    
+
     expect(response.statusCode).toEqual(201);
-    expect(typeof response.body.accessToken).toEqual("string")
-  
+    expect(typeof response.body.accessToken).toEqual('string');
+
     accessToken = response.body.accessToken;
   });
 
   it('Validar se o usuário ainda é user: ', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/me')
-      .set("Authorization", `barrer ${accessToken}`)
+      .set('Authorization', `barrer ${accessToken}`)
       .send();
 
     expect(response.statusCode).toEqual(201);
-    expect(typeof response.body.id).toEqual("number");
+    expect(typeof response.body.id).toEqual('number');
     expect(response.body.role).toEqual(Role.User);
 
     userId = response.body.id;
   });
 
-  
   it('Tentar vizualizar todo os usuários:  ', async () => {
     const response = await request(app.getHttpServer())
       .get('/users')
-      .set("Authorization", `barrer ${accessToken}`)
+      .set('Authorization', `barrer ${accessToken}`)
       .send();
 
     expect(response.statusCode).toEqual(403);
-    expect(response.body.error).toEqual("Forbidden");
-
+    expect(response.body.error).toEqual('Forbidden');
   });
 
   it('Alterando de forma manual o usuário para Admin: ', async () => {
     const ds = await dataSource.initialize();
     const queryRunner = ds.createQueryRunner();
-  
+
     await queryRunner.query(`
       UPDATE users SET role = ${Role.Admin} WHERE id = ${userId};
     `);
-  
-    const rows = await queryRunner.query(`SELECT * FROM users WHERE id = ${userId};`);
+
+    const rows = await queryRunner.query(
+      `SELECT * FROM users WHERE id = ${userId};`,
+    );
     console.log('Updated User:', rows);
 
-    ds.destroy()
-  
+    ds.destroy();
+
     expect(rows.length).toEqual(1);
     expect(rows[0].role).toEqual(Role.Admin);
   });
 
+  it('Tentar vizualizar todos os usuário (COM ACESSO DE ADMIN):  ', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/users')
+      .set('Authorization', `barrer ${accessToken}`)
+      .send();
 
-it('Tentar vizualizar todos os usuário (COM ACESSO DE ADMIN):  ', async () => {
-  const response = await request(app.getHttpServer())
-    .get('/users')
-    .set("Authorization", `barrer ${accessToken}`)
-    .send();
+    console.log('Users:', response.body);
 
-  console.log('Users:', response.body);
-  
-  expect(response.statusCode).toEqual(200);
-  expect(response.body.length).toEqual(2);
-});
-
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.length).toEqual(2);
+  });
 });

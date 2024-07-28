@@ -12,7 +12,5 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new LogInterceptor());
   await app.listen(7000);
-
-
 }
 bootstrap();
